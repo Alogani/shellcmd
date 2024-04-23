@@ -1,5 +1,5 @@
 # shellcmd
-Collection of Terminal commands to be used inside nim.
+Collection of Terminal commands to be used inside nim. (Unix only for now)
 
 You can see shellcmd-example to see some usage
 
