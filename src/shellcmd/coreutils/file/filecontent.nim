@@ -3,7 +3,11 @@ import ../common
 
 proc readFileInto*(sh: ProcArgs, path: Path, dest: AsyncIOBase, closeStream = false): Future[void] =
     # best way to async is spawning a thread, shall not be too expensive
-    sh.runAssertDiscard(@["cat", $path], internalCmd.merge(output = some (dest, closeStream)))
+    var fut = sh.runDiscard(@["cat", $path], internalCmd.merge(output = some dest))
+    if closeStream:
+        return fut.then(proc() {.async.} = dest.close())
+    else:
+        return fut
 
 proc readFileToStream*(sh: ProcArgs, path: Path): AsyncIoBase =
     var (stream, _) = sh.runGetOutputStream(@["cat", $path], internalCmd)
@@ -25,7 +29,7 @@ proc getWriteCmd(path: Path, append: bool): seq[string] =
 
 proc writeFileFrom*(sh: ProcArgs, path: Path, src: AsyncIOBase, append: bool = false): Future[void] =
     # If src is an unclosed stream or pipe, will cause a deadlock
-    sh.runAssertDiscard(getWriteCmd(path, append), internalCmd.merge(input = some (src, false)))
+    sh.runDiscard(getWriteCmd(path, append), internalCmd.merge(input = some src))
 
 proc writeFile*(sh: ProcArgs, path: Path, data: string, append: bool = false): Future[void] =
     sh.writeFileFrom(path, AsyncString.new(data), append)
@@ -35,4 +39,4 @@ proc writeLines*(sh: ProcArgs, path: Path, lines: seq[string]): Future[void] =
 
 proc createSparseFile*(sh: ProcArgs, path: Path, size: StorageSize): Future[void] =
     ## You can use parseSize from parseutils to get size
-    sh.runAssertDiscard(@["truncate", "-s", size.toString(), $path], internalCmd)
+    sh.runDiscard(@["truncate", "-s", size.toString(), $path], internalCmd)

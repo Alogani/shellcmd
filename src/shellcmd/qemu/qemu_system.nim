@@ -3,7 +3,7 @@ export ImageFormat
 
 type
     QvmRunOption* = enum
-        WithBootMenu, EnableKVM
+        WithBootMenu, EnableKVM, NoGui
 
     PortForwarding* = object
         hostPort: int
@@ -17,7 +17,7 @@ forwardings: seq[PortForwarding] = @[],
 ram = 512.MB,
 cpuCount = 1
 ) {.async.} =
-    await sh.runAssertDiscard(concat(@["qemu-system-x86_64",
+    await sh.runDiscard(concat(@["qemu-system-x86_64",
             "-m", ram.toQemuString(),
             "-smp", $cpuCount,
             "-drive",
@@ -37,4 +37,5 @@ cpuCount = 1
             res),
         (if WithBootMenu in runOptions: @["-boot", "menu=on"] else: @[]),
         (if EnableKVM in runOptions: @["-enable-kvm"] else: @[]),
+        (if NoGui in runOptions: @["-nographic"] else: @[]),
     ))

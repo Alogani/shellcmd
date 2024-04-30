@@ -9,35 +9,36 @@ proc exists*(sh: ProcArgs, path: Path): Future[bool] =
     sh.runCheck(@["test", "-e", $path], internalCmd)
 
 proc touch*(sh: ProcArgs, path: Path): Future[void] =
-    sh.runAssertDiscard(@["touch", $path], internalCmd)
+    sh.runDiscard(@["touch", $path], internalCmd)
 
 proc unlink*(sh: ProcArgs, paths: seq[Path], nofail = false): Future[void] {.async.} =
+    ## Danger: will not ask any permission
     if nofail:
-        discard await sh.run(@["rm"] & seq[string](paths), internalCmd)
+        discard await sh.run(@["rm", "-rf"] & seq[string](paths), internalCmd)
     else:
-        await sh.runAssertDiscard(@["rm"] & seq[string](paths), internalCmd)
+        await sh.runDiscard(@["rm", "-rf"] & seq[string](paths), internalCmd)
 
 proc unlink*(sh: ProcArgs, path: Path, nofail = false): Future[void] =
     sh.unlink(@[path], nofail)
 
 proc shred*(sh: ProcArgs, paths: seq[Path], iterations = 3): Future[void] =
-    sh.runAssertDiscard(@["shred", "-f", "-u", "-n", $iterations] & seq[string](paths))
+    sh.runDiscard(@["shred", "-f", "-u", "-n", $iterations] & seq[string](paths))
 
 proc shred*(sh: ProcArgs, path: Path, iterations = 3): Future[void] =
     sh.shred(@[path], iterations)
 
 proc mkdir*(sh: ProcArgs, path: Path, parents = false, octal_mode = ""): Future[void] =
     ## Raise error if directory exists and parent is set to false
-    sh.runAssertDiscard(@["mkdir", $path] &
+    sh.runDiscard(@["mkdir", $path] &
         (if parents: @["-p"] else: @[]) &
         (if octal_mode != "": @["-m", octal_mode] else: @[])
     , internalCmd)
 
 proc rmdir*(sh: ProcArgs, path: Path): Future[void] =
-    sh.runAssertDiscard(@["rmdir", $path], internalCmd)
+    sh.runDiscard(@["rmdir", $path], internalCmd)
 
 proc rmtree*(sh: ProcArgs, path: Path): Future[void] =
-    sh.runAssertDiscard(@["rm", "-r", $path], internalCmd)
+    sh.runDiscard(@["rm", "-r", $path], internalCmd)
 
 proc cp*(sh: ProcArgs, src, dest: Path, overwrite = false,
 followSymLinks = false, preserveAttributes = true) {.async.} =
@@ -45,7 +46,7 @@ followSymLinks = false, preserveAttributes = true) {.async.} =
         if not overwrite:
             raise newException(ExecError, "File already exists")
         await rmtree(sh, dest)
-    await sh.runAssertDiscard(@["cp", "-r"] &
+    await sh.runDiscard(@["cp", "-r"] &
         (if followSymLinks: @["-L"] else: @["-P"]) &
         (if preserveAttributes: @["-a"] else: @[]) &
         @[$src, $dest], internalCmd)
@@ -55,10 +56,10 @@ proc rename*(sh: ProcArgs, src, dest: Path, overwrite: bool = false) {.async.} =
         if not overwrite:
             raise newException(ExecError, "File already exists")
         await rmtree(sh, dest)
-    await sh.runAssertDiscard(@["mv", $src, $dest], internalCmd)
+    await sh.runDiscard(@["mv", $src, $dest], internalCmd)
 
 proc dd*(sh: ProcArgs, src, dest: Path, append = false, count = -1, blockSize = 4.Mb): Future[void] =
-    sh.runAssertDiscard(@["dd", "if=" & src, "status=none"] &
+    sh.runDiscard(@["dd", "if=" & src, "status=none"] &
         (if append: @["oflag=append", "conv=notrunc"] else: @[]) &
         (if count != -1: @["count=" & $count] else: @[]) &
         @["bs=" & blockSize.toString(suffix = "")] &
@@ -76,7 +77,7 @@ proc wipeDisk*(sh: ProcArgs, dest: Path, useSource = DevNull): Future[void] {.as
 
 proc symlinkTo*(sh: ProcArgs, src, dest: Path): Future[void] =
     # Careful between absolute and relative
-    sh.runAssertDiscard(@["ln", "-s", $src, $dest], internalCmd)
+    sh.runDiscard(@["ln", "-s", $src, $dest], internalCmd)
 
 proc ls*(sh: ProcArgs, path: Path, sort = true): Future[seq[Path]] {.async.} =
     ## Use find instead of ls. Notable difference is that if path is a file, it won't be returned
@@ -91,7 +92,7 @@ proc isDirEmpty*(sh: ProcArgs, path: Path): Future[bool] {.async.} =
     return dirs[0] == $path
 
 proc mkfifo*(sh: ProcArgs, path: Path): Future[void] =
-    sh.runAssertDiscard(@["mkfifo", path])
+    sh.runDiscard(@["mkfifo", path])
 
 template withFifo*(sh: ProcArgs, path: Path, body: untyped) =
     await sh.mkfifo(path)

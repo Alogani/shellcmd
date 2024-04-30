@@ -25,9 +25,9 @@ proc listRunningOrEnabled*(sh: ProcArgs): Future[seq[string]] {.async.} =
 proc start(sh: ProcArgs, enable = false, services: varargs[string]) {.async.} =
     if services.len() == 0:
         return
-    await sh.runAssertDiscard(@["systemctl", "start"] & @services)
+    await sh.runDiscard(@["systemctl", "start"] & @services)
     if enable:
-        await sh.runAssertDiscard(@["systemctl", "enable"] & @services)
+        await sh.runDiscard(@["systemctl", "enable"] & @services)
 
 proc start*(sh: ProcArgs, services: varargs[string]): Future[void] =
     sh.start(enable = false, services)
@@ -38,9 +38,9 @@ proc startAndEnable*(sh: ProcArgs, services: varargs[string]): Future[void] =
 proc stop(sh: ProcArgs, disable = false, services: varargs[string]) {.async.} =
     if services.len() == 0:
         return
-    await sh.runAssertDiscard(@["systemctl", "stop"] & @services)
+    await sh.runDiscard(@["systemctl", "stop"] & @services)
     if disable:
-        await sh.runAssertDiscard(@["systemctl", "disable"] & @services)
+        await sh.runDiscard(@["systemctl", "disable"] & @services)
 
 proc stop*(sh: ProcArgs, services: varargs[string]): Future[void] =
     sh.stop(disable = false, services)
@@ -50,11 +50,11 @@ proc stopAndDisable*(sh: ProcArgs, services: varargs[string]): Future[void] =
 
 proc restart*(sh: ProcArgs, services: varargs[string]): Future[void] =
     if services.len() == 0: return
-    sh.runAssertDiscard(@["systemctl", "restart"] & @services)
+    sh.runDiscard(@["systemctl", "restart"] & @services)
 
 proc reload*(sh: ProcArgs, services: varargs[string]): Future[void] =
     if services.len() == 0: return
-    sh.runAssertDiscard(@["systemctl", "reload"] & @services)
+    sh.runDiscard(@["systemctl", "reload"] & @services)
 
 proc daemonReload*(sh: ProcArgs): Future[void] =
-    sh.runAssertDiscard(@["systemctl", "deamon-reload"])
+    sh.runDiscard(@["systemctl", "deamon-reload"])

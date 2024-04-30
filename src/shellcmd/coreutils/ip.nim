@@ -60,7 +60,7 @@ proc getRouteInfo*(sh: ProcArgs): Future[seq[RouteInfo]] {.async.} =
         )
 
 proc enableInterface*(sh: ProcArgs, name: string): Future[void] =
-    sh.runAssertDiscard(@["ip", "link", "set", name, "up"])
+    sh.runDiscard(@["ip", "link", "set", name, "up"])
 
 proc disableInterface*(sh: ProcArgs, name: string): Future[void] =
-    sh.runAssertDiscard(@["ip", "link", "set", name, "down"])
+    sh.runDiscard(@["ip", "link", "set", name, "down"])

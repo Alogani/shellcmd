@@ -8,16 +8,16 @@ type
 
 proc createDisk*(sh: ProcArgs, path: Path, size: StorageSize, format: ImageFormat) {.async.} =
     await sh.unlink(path, nofail = true)
-    await sh.runAssertDiscard(@[
+    await sh.runDiscard(@[
         "qemu-img", "create", "-f", $format, path, size.toQemuString()
     ])
     
 proc resize*(sh: ProcArgs, img: Path, sign: ResizeSign, sizeDiff: StorageSize, format: ImageFormat) {.async.} =
     ## shrink will create data loss at the end of disk
     if sign == Shrink:
-        await sh.runAssertDiscard(@["qemu-img", "resize", "-f", $format, img, "--shrink", "-" & sizeDiff.toQemuString()])
+        await sh.runDiscard(@["qemu-img", "resize", "-f", $format, img, "--shrink", "-" & sizeDiff.toQemuString()])
     else:
-        await sh.runAssertDiscard(@["qemu-img", "resize", "-f", $format, img, "+" & sizeDiff.toQemuString()])
+        await sh.runDiscard(@["qemu-img", "resize", "-f", $format, img, "+" & sizeDiff.toQemuString()])
 
 
 proc attachPartitionsToHost*(sh: ProcArgs, img: Path, format: ImageFormat): Future[seq[Path]] {.async.} =
@@ -32,13 +32,13 @@ proc attachPartitionsToHost*(sh: ProcArgs, img: Path, format: ImageFormat): Futu
                     res = file.extractFileName()[3]
                     break
             res
-        await sh.runAssertDiscard(@["modprobe", "nbd", "max_parts=16"], internalCmd)
-        await sh.runAssertDiscard(@["qemu-nbd", "--connect=/dev/nbd" & freeSlot, img])
+        await sh.runDiscard(@["modprobe", "nbd", "max_parts=16"], internalCmd)
+        await sh.runDiscard(@["qemu-nbd", "--connect=/dev/nbd" & freeSlot, img])
         await sh.find("/dev", @[matchName("nbd" & freeSlot & "*")])
 
 proc detachPartitions*(sh: ProcArgs, rootPartition: Path) {.async.} =
     if rootPartition.extractFileName()[0 .. 2] == "nbd":
-        await sh.runAssertDiscard(@["qemu-nbd", "-d", rootPartition])
+        await sh.runDiscard(@["qemu-nbd", "-d", rootPartition])
     else:
         await losetup.detach(sh, rootPartition)
 
@@ -49,14 +49,14 @@ proc createSnapshot*(sh: ProcArgs, img, backup: Path, format: ImageFormat) {.asy
     ## Lighweight because incremental change
     ## Ensure the vm is not up and running
     await sh.rename(img, backup)
-    await sh.runAssertDiscard(@["qemu-img", "create", "-f", $format, "-b", backup, img])
+    await sh.runDiscard(@["qemu-img", "create", "-f", $format, "-b", backup, img])
 
 proc commitSnapshotChanges*(sh: ProcArgs, snapshot: Path) {.async.} =
-    await sh.runAssertDiscard(@["qemu-img", "commit", snapshot])
+    await sh.runDiscard(@["qemu-img", "commit", snapshot])
 
 proc changeSnapshotBackupFile*(sh: ProcArgs, snapshot, backup: Path) {.async.} =
     ## Use mvSnapshotBackup if possible
-    await sh.runAssertDiscard(@["qemu-img", "rebase", "-b", backup, snapshot])
+    await sh.runDiscard(@["qemu-img", "rebase", "-b", backup, snapshot])
 
 proc mvSnapshotBackup*(sh: ProcArgs, snapshot, backupSrc, backupDest: Path) {.async.} =
     await sh.rename(backupSrc, backupDest)

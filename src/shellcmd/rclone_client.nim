@@ -12,7 +12,7 @@ proc mount*(sh: ProcArgs, profileFile, mountpoint: Path, remoteName = ""): Futur
         else:
             remoteName
     # Could also popen with start_new_session=True
-    sh.runAssertDiscard(@["rclone", "--daemon", "--config=" & profileFile, "mount",
+    sh.runDiscard(@["rclone", "--daemon", "--config=" & profileFile, "mount",
         "--vfs-cache-mode", "writes", "--allow-non-empty", "--allow-other",
         remoteName & ":/", mountpoint])
         

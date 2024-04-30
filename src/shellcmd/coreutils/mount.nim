@@ -39,7 +39,7 @@ func toString*(flags: set[MountFlag]): string
 
 
 proc mount*(sh: ProcArgs, path, dest: Path, mountFlags: set[MountFlag] = {}, bindMount = false, fsType = Auto, otherOptions = ""): Future[void] =
-    sh.runAssertDiscard(@["mount"] &
+    sh.runDiscard(@["mount"] &
         (if fsType != Auto: @["-t", fsType.typeRepr] else: @[]) &
         (if mountFlags != {} or otherOptions != "": @["-o", @[mountFlags.toString(), otherOptions].join(",")] else: @[]) &
         (if bindMount: @["--bind"] else: @[]) &
@@ -50,17 +50,17 @@ proc mount*(sh: ProcArgs, dev: DeviceID, dest: Path, mountFlags: set[MountFlag] 
     sh.mount(dev.getMountRepr(), dest, fsType = fsType, mountFlags = mountFlags, otherOptions = otherOptions)
 
 proc mount*(sh: ProcArgs, dest: Path, mountFlags: set[MountFlag] = {}, fsType: FileSystemType = Auto, otherOptions = ""): Future[void] =
-    sh.runAssertDiscard(@["mount", "-t", fsType.typeRepr] &
+    sh.runDiscard(@["mount", "-t", fsType.typeRepr] &
         (if fsType != Auto: @["-t", fsType.typeRepr] else: @[]) &
         (if mountFlags != {}: @["-o", @[mountFlags.toString(), otherOptions].join(",")] else: @[]) &
         @[$dest],
     internalCmd)
 
 proc umount*(sh: ProcArgs, path: Path) {.async.} =
-    await sh.runAssertDiscard(@["umount", path], internalCmd)
+    await sh.runDiscard(@["umount", path], internalCmd)
 
 proc mountAll*(sh: ProcArgs) {.async.} =
-    await sh.runAssertDiscard(@["mount", "-a"], internalCmd)
+    await sh.runDiscard(@["mount", "-a"], internalCmd)
 
 proc listMounts*(sh: ProcArgs): Future[seq[string]] {.async.} =
     collect:

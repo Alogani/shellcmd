@@ -4,7 +4,7 @@ import ./[common, distro, systemctl]
 
 proc install*(sh: ProcArgs, packages: varargs[string]) {.async.} =
     if packages.len() == 0: return
-    await sh.runAssertDiscard((case await sh.getDistroName():
+    await sh.runDiscard((case await sh.getDistroName():
         of Debian:
             @["apt", "install"]
         of Fedora:
@@ -29,7 +29,7 @@ proc installWithoutEnabling*(sh: ProcArgs, packages: varargs[string]) {.async.} 
 
 proc remove*(sh: ProcArgs, packages: varargs[string]) {.async.} =
     if packages.len() == 0: return
-    await sh.runAssertDiscard((case await sh.getDistroName():
+    await sh.runDiscard((case await sh.getDistroName():
         of Debian:
             @["apt", "autoremove"]
         of Fedora:
@@ -41,7 +41,7 @@ proc remove*(sh: ProcArgs, packages: varargs[string]) {.async.} =
 
 proc removeAndPurge*(sh: ProcArgs, packages: varargs[string]) {.async.} =
     if packages.len() == 0: return
-    await sh.runAssertDiscard((case await sh.getDistroName():
+    await sh.runDiscard((case await sh.getDistroName():
         of Debian:
             @["apt", "autoremove", "--purge"]
         of Fedora: ## Fedora: Simple remove, no purge equivalent
@@ -52,7 +52,7 @@ proc removeAndPurge*(sh: ProcArgs, packages: varargs[string]) {.async.} =
     )
 
 proc update*(sh: ProcArgs) {.async.} =
-    await sh.runAssertDiscard((case await sh.getDistroName():
+    await sh.runDiscard((case await sh.getDistroName():
         of Debian:
             @["apt", "update"]
         of Fedora:
@@ -63,7 +63,7 @@ proc update*(sh: ProcArgs) {.async.} =
     )
 
 proc clean*(sh: ProcArgs) {.async.} =
-    await sh.runAssertDiscard((case await sh.getDistroName():
+    await sh.runDiscard((case await sh.getDistroName():
         of Debian:
             @["apt", "clean"]
         of Fedora:
@@ -76,4 +76,4 @@ proc clean*(sh: ProcArgs) {.async.} =
 
 proc installPip*(sh: ProcArgs, packages: varargs[string]) {.async.} =
     if packages.len() == 0: return
-    await sh.runAssertDiscard(@["python3", "-m", "pip", "install"] & @packages)
+    await sh.runDiscard(@["python3", "-m", "pip", "install"] & @packages)

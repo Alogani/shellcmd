@@ -32,7 +32,7 @@ proc compress*(sh: ProcArgs, src, dest: Path, algo: Algorithm) {.async.} =
         var (stream, finishFut) = sh.runGetOutputStream(@["xz", "-zck", $src], internalCmd)
         await sh.writeFileFrom(dest, stream) and finishFut
     of Zstd:
-        await sh.runAssertDiscard(@["zstd", "-zk", $src, "-o", $dest], internalCmd)
+        await sh.runDiscard(@["zstd", "-zk", $src, "-o", $dest], internalCmd)
     else:
         raise newException(OSError, "Algorithm not implemented")
 
@@ -51,6 +51,6 @@ proc uncompress*(sh: ProcArgs, src, dest: Path, algo: Algorithm) {.async.} =
         var (stream, finishFut) = sh.runGetOutputStream(@["xz", "-dck", $src], internalCmd)
         await sh.writeFileFrom(dest, stream) and finishFut
     of Zstd:
-        await sh.runAssertDiscard(@["unzstd", $src, "-o", $dest])
+        await sh.runDiscard(@["unzstd", $src, "-o", $dest])
     else:
         raise newException(OSError, "Algorithm not implemented")
