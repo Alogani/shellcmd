@@ -44,6 +44,8 @@ import ./coreutils/paths
 export paths
 import ./coreutils/repl
 export repl
+import ./coreutils/rsync
+export rsync
 import ./coreutils/swap
 export swap
 import ./coreutils/systemctl

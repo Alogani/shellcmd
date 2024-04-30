@@ -12,10 +12,11 @@ proc touch*(sh: ProcArgs, path: Path): Future[void] =
     sh.runDiscard(@["touch", $path], internalCmd)
 
 proc unlink*(sh: ProcArgs, paths: seq[Path], nofail = false): Future[void] {.async.} =
+    ## Danger: will not ask any permission
     if nofail:
-        discard await sh.run(@["rm"] & seq[string](paths), internalCmd)
+        discard await sh.run(@["rm", "-rf"] & seq[string](paths), internalCmd)
     else:
-        await sh.runDiscard(@["rm"] & seq[string](paths), internalCmd)
+        await sh.runDiscard(@["rm", "-rf"] & seq[string](paths), internalCmd)
 
 proc unlink*(sh: ProcArgs, path: Path, nofail = false): Future[void] =
     sh.unlink(@[path], nofail)

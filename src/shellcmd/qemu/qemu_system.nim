@@ -3,7 +3,7 @@ export ImageFormat
 
 type
     QvmRunOption* = enum
-        WithBootMenu, EnableKVM
+        WithBootMenu, EnableKVM, NoGui
 
     PortForwarding* = object
         hostPort: int
@@ -37,4 +37,5 @@ cpuCount = 1
             res),
         (if WithBootMenu in runOptions: @["-boot", "menu=on"] else: @[]),
         (if EnableKVM in runOptions: @["-enable-kvm"] else: @[]),
+        (if NoGui in runOptions: @["-nographic"] else: @[]),
     ))
