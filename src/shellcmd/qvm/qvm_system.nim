@@ -17,7 +17,7 @@ forwardings: seq[PortForwarding] = @[],
 ram = 512.MB,
 cpuCount = 1
 ) {.async.} =
-    await sh.runAssertDiscard(concat(@["qemu-system-x86_64",
+    await sh.runDiscard(concat(@["qemu-system-x86_64",
             "-m", ram.toQemuString(),
             "-smp", $cpuCount,
             "-drive",

@@ -85,10 +85,10 @@ proc findMntSource*(sh: ProcArgs, path: Path): Future[Path] =
 
 ## OWNER AND GROUPS
 proc chmod*(sh: ProcArgs, path: Path, octal_mode: string): Future[void] =
-    sh.runAssertDiscard(@["chmod", octal_mode, $path], internalCmd)
+    sh.runDiscard(@["chmod", octal_mode, $path], internalCmd)
 
 proc chown*(sh: ProcArgs, path: Path, user: string, group: string = ""): Future[void] =
-    sh.runAssertDiscard(@["chown",
+    sh.runDiscard(@["chown",
         (if group != "":
             user & ":" & group
         else:

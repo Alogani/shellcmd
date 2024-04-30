@@ -22,13 +22,13 @@ const
 proc mkfs*(sh: ProcArgs, path: Path, fsType: FileSystemType): Future[void] =
     if fsType.mkfsCmd.len == 0:
         raise newException(OsError, "FileSystem type is not valid for mkfs")
-    sh.runAssertDiscard(fsType.mkfsCmd & @[$path], internalCmd)
+    sh.runDiscard(fsType.mkfsCmd & @[$path], internalCmd)
 
 proc mke2fs*(sh: ProcArgs, path: Path, fsType: FileSystemType, uuid = "", reservedBlockPercent = 5): Future[void] =
     ## Specialized version for ext2/ext3/ext4 filesystems, see man
     if fsType.typeRepr[0..2] != "ext":
         raise newException(OsError, "FileSystem type is not valid for mke2fs")
-    sh.runAssertDiscard(fsType.mkfsCmd & @[$path] &
+    sh.runDiscard(fsType.mkfsCmd & @[$path] &
         (if uuid != "": @["-U", uuid] else: @[]) &
         (if reservedBlockPercent != 5: @["-m", $reservedBlockPercent] else: @[])
     , internalCmd)

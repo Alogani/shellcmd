@@ -23,7 +23,7 @@ proc mount*(sh: ProcArgs, address: string, mountpoint: Path, port=22, mountoptio
         ) & "reconnect,auto_cache" &
             (if OptPerformance in mountoptions: ",Ciphers=aes128-gcm@openssh,Compression=no" else: ""
         )
-    await sh.runAssertDiscard(@["sshfs", "-p", $port] & (
+    await sh.runDiscard(@["sshfs", "-p", $port] & (
         if optionsStr != "":
             @["-o", optionsStr]
         else:
@@ -31,7 +31,7 @@ proc mount*(sh: ProcArgs, address: string, mountpoint: Path, port=22, mountoptio
     ) & @[address & ":/", $mountpoint])
 
 proc tunnel*(sh: ProcArgs, serverAddr: string, sshPort=22; clientExitPort, serverEntryPort: int) {.async.} =
-    await sh.runAssertDiscard(@["ssh", "-p", $sshPort, "-L",
+    await sh.runDiscard(@["ssh", "-p", $sshPort, "-L",
         fmt"127.0.0.1:{clientExitPort}:127.0.0.1:{serverEntryPort}",
         serverAddr])
 

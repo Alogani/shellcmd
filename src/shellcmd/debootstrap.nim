@@ -12,5 +12,5 @@ type
 
 proc debootstrap*(sh: ProcArgs, path: Path, arch = Amd64, variant = MinBase,
             release = Stable, mirror = "http://ftp.fr.debian.org/debian/"): Future[void] =
-    sh.runAssertDiscard(@["debootstrap", "--arch=" & $arch, "--variant=" & $variant,
+    sh.runDiscard(@["debootstrap", "--arch=" & $arch, "--variant=" & $variant,
         $release, path, mirror])
