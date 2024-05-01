@@ -15,8 +15,14 @@ converter toFutPath*(futPath: Future[string]): Future[Path] =
 converter toPath*(path: string): Path =
     Path(path)
 
+converter toSeqPath*(path: seq[string]): seq[Path] =
+    cast[seq[Path]](path)
+
 converter toString*(path: Path): string =
     $path
+
+converter toSeqString*(path: seq[Path]): seq[string] =
+    cast[seq[string]](path)
 
 proc getCurrentDir*(sh: ProcArgs): Future[Path] =
     sh.runGetOutput(@["pwd"], internalCmd)

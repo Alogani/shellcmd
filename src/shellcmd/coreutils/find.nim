@@ -2,6 +2,7 @@ import ./common
 import ./file/fileinfo
 
 import aloganimisc/seqmisc
+import std/strutils
 
 
 type Filter = distinct seq[string]
@@ -19,7 +20,12 @@ proc Greater*(n: int): NumArg
 proc Lesser*(n: int): NumArg
 proc Exactly*(n: int): NumArg
 
+proc `not`*(filter: Filter): Filter
+proc `or`*(filterA, filterB: Filter): Filter
+proc excludeDirContent*(filter: Filter): Filter
+proc group*(filters: varargs[Filter]): Filter
 proc matchName*(pattern: string, caseSensitive = false): Filter
+proc matchPath*(pattern: string, caseSensitive = false): Filter
 proc matchRegex*(pattern: string, caseSensitive = false): Filter
 proc isEmpty*(): Filter
 proc isReadable*(): Filter
@@ -38,17 +44,22 @@ proc wasModifiedMinutes*(num: NumArg, dateType: DateRecord): Filter
 proc wasModifiedDays*(num: NumArg, dateType: DateRecord): Filter
 
 proc fileTypToArg(fileType: FileType): string
+proc toSeqString(filters: seq[Filter]): seq[string]
 
 
-proc find*(sh: ProcArgs, path: Path, filters: seq[Filter] = @[], mindepth = -1, maxdepth = -1, followSymlinks = false): Future[seq[Path]] =
+proc find*(sh: ProcArgs, path: Path, filters: seq[Filter] = @[], mindepth = -1, maxdepth = -1, followSymlinks = false, ditchRootName = false): Future[seq[Path]] {.async.} =
+    ## Adding multiple filters is equivalent to "and"
     ## Due to simplification, no positional argument modifier like -wasModifiedDaystart have been implemented
-    cast[Future[seq[Path]]](sh.runGetLines(@["find"] &
+    var data = await sh.runGetOutput(@["find"] &
         (if followSymlinks: @["-L"] else: @["-P"]) &
         (if mindepth >= 0: @["-mindepth", $mindepth] else: @[]) &
         (if maxdepth >= 0: @["-maxdepth", $maxdepth] else: @[]) &
-        @[$path] &
-        cast[seq[seq[string]]](filters).flatten(),
-    internalCmd))
+        @[$path, "("] &
+        filters.toSeqString() & @[")"] &
+        (if ditchRootName: @["-printf", "%P\\0"] else: @["-print0"]),
+    internalCmd)
+    data.setLen(data.len() - 1) # Remove trailing "\0"
+    return cast[seq[Path]](data.split("\0"))
 
 
 proc Greater*(n: int): NumArg = NumArg("+" & $n)
@@ -56,6 +67,20 @@ proc Lesser*(n: int): NumArg = NumArg("-" & $n)
 proc Exactly*(n: int): NumArg = NumArg($n)
 converter toNumArg*(n: int): NumArg = NumArg($n)
 
+
+proc `not`*(filter: Filter): Filter =
+    Filter(@["-not"] & cast[seq[string]](filter))
+
+proc `or`*(filterA, filterB: Filter): Filter =
+    Filter(cast[seq[string]](filterA) & @["-or"] & cast[seq[string]](filterB)) 
+
+proc excludeDirContent*(filter: Filter): Filter =
+    ## Don't exclude a dir but its content
+    ## Careful, will only retyrn true if filter is true, so to use with other filters, use `or`
+    group(filter, Filter(@["-prune"]))
+
+proc group*(filters: varargs[Filter]): Filter =
+    Filter(@["("] & @filters.toSeqString() & @[")"])
 
 proc hasTypes*(fileType: seq[FileType]): Filter =
     var typList: seq[string]
@@ -88,6 +113,14 @@ proc matchName*(pattern: string, caseSensitive = false): Filter =
             @["-name", pattern]
         else:
             @["-iname", pattern]
+    )
+
+proc matchPath*(pattern: string, caseSensitive = false): Filter =
+    Filter(
+        if caseSensitive:
+            @["-path", pattern]
+        else:
+            @["-ipath", pattern]
     )
 
 proc matchRegex*(pattern: string, caseSensitive = false): Filter =
@@ -174,3 +207,6 @@ proc fileTypToArg(fileType: FileType): string =
         "b"
     of Socket:
         "s"
+
+proc toSeqString(filters: seq[Filter]): seq[string] =
+    cast[seq[seq[string]]](filters).flatten()

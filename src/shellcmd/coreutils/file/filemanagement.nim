@@ -12,11 +12,11 @@ proc touch*(sh: ProcArgs, path: Path): Future[void] =
     sh.runDiscard(@["touch", $path], internalCmd)
 
 proc unlink*(sh: ProcArgs, paths: seq[Path], nofail = false): Future[void] {.async.} =
-    ## Danger: will not ask any permission
+    ## Danger: will not ask any permission. Use rmtree to delete a non empty dir
     if nofail:
-        discard await sh.run(@["rm", "-rf"] & seq[string](paths), internalCmd)
+        discard await sh.run(@["rm", "-f"] & seq[string](paths), internalCmd)
     else:
-        await sh.runDiscard(@["rm", "-rf"] & seq[string](paths), internalCmd)
+        await sh.runDiscard(@["rm", "-f"] & seq[string](paths), internalCmd)
 
 proc unlink*(sh: ProcArgs, path: Path, nofail = false): Future[void] =
     sh.unlink(@[path], nofail)
@@ -38,7 +38,8 @@ proc rmdir*(sh: ProcArgs, path: Path): Future[void] =
     sh.runDiscard(@["rmdir", $path], internalCmd)
 
 proc rmtree*(sh: ProcArgs, path: Path): Future[void] =
-    sh.runDiscard(@["rm", "-r", $path], internalCmd)
+    ## Danger, will not ask any permission
+    sh.runDiscard(@["rm", "-rf", $path], internalCmd)
 
 proc cp*(sh: ProcArgs, src, dest: Path, overwrite = false,
 followSymLinks = false, preserveAttributes = true) {.async.} =
