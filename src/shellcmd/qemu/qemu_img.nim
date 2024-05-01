@@ -23,7 +23,7 @@ proc resize*(sh: ProcArgs, img: Path, sign: ResizeSign, sizeDiff: StorageSize, f
 proc attachPartitionsToHost*(sh: ProcArgs, img: Path, format: ImageFormat): Future[seq[Path]] {.async.} =
     ## Can then be mount with mount
     if format == Raw:
-        return await losetup.attach(sh, img)
+        return await sh.attachLoopDev(img)
     else:
         let freeSlot = block:
             var res: char
@@ -40,7 +40,7 @@ proc detachPartitions*(sh: ProcArgs, rootPartition: Path) {.async.} =
     if rootPartition.extractFileName()[0 .. 2] == "nbd":
         await sh.runDiscard(@["qemu-nbd", "-d", rootPartition])
     else:
-        await losetup.detach(sh, rootPartition)
+        await sh.detachloopDev(rootPartition)
 
 
 ## Glossary : Backup means the original file on which a snapshot lie against
