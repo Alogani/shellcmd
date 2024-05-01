@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.2.0"
+version       = "0.2.1"
 author        = "alogani"
 description   = "Collection of Terminal commands to be used inside nim"
 license       = "MIT"

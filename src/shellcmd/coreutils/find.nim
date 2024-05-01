@@ -54,8 +54,8 @@ proc find*(sh: ProcArgs, path: Path, filters: seq[Filter] = @[], mindepth = -1, 
         (if followSymlinks: @["-L"] else: @["-P"]) &
         (if mindepth >= 0: @["-mindepth", $mindepth] else: @[]) &
         (if maxdepth >= 0: @["-maxdepth", $maxdepth] else: @[]) &
-        @[$path, "("] &
-        filters.toSeqString() & @[")"] &
+        @[$path] &
+        filters.toSeqString() &
         (if ditchRootName: @["-printf", "%P\\0"] else: @["-print0"]),
     internalCmd)
     data.setLen(data.len() - 1) # Remove trailing "\0"
@@ -76,7 +76,10 @@ proc `or`*(filterA, filterB: Filter): Filter =
 
 proc excludeDirContent*(filter: Filter): Filter =
     ## Don't exclude a dir but its content
-    ## Careful, will only retyrn true if filter is true, so to use with other filters, use `or`
+    ## Careful to those deceptive behaviours:
+    ##  - will only return true if filter is true, so to use with other filters, use `or`
+    ##  - must be put before other filters, otherwise filters before will be ignored
+    ##  - Using it more than once result in unexpected behaviour (use more complex argument instead)
     group(filter, Filter(@["-prune"]))
 
 proc group*(filters: varargs[Filter]): Filter =
