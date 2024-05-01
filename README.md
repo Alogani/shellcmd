@@ -22,6 +22,10 @@ Collection of asynchronous Terminal commands to be used inside nim.
 
 You can see [shellcmd-examples](https://github.com/Alogani/shellcmd-examples) to see some usage
 
+### To go further
+
+Source files should be well organized, and it should be easy to understand what each command does and how only by looking into the source file.
+
 ## Before using it
 - Young API: usage of some tools are susceptible to change. Releases with breaking change will make the second number of semver be updated (eg: v0.1.1 to v0.2.0). For sensitive script, it is advised to run before inside a virtual machine or a chroot
 - Host OS: Only available in unix. Support for windows is not in the priority list
