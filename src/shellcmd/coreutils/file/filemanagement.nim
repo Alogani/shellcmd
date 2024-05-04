@@ -86,11 +86,13 @@ proc ls*(sh: ProcArgs, path: Path, sort = true): Future[seq[Path]] {.async.} =
     var data = await sh.runGetLines(@["ls", $path, "-1"] & (
             (if sort: @["-v"] else: @["-U"])
         ), internalCmd)
-    result = seq[Path](data)
+    if data.len() == 1 and data[0] == "":
+        return
+    else:
+        return seq[Path](data)
 
 proc isDirEmpty*(sh: ProcArgs, path: Path): Future[bool] {.async.} =
-    let dirs = await sh.runGetLines(@["find", path, "-type", "d", "-empty"], internalCmd)
-    return dirs[0] == $path
+    await(sh.ls(path)).len() == 0
 
 proc mkfifo*(sh: ProcArgs, path: Path): Future[void] =
     sh.runDiscard(@["mkfifo", path])

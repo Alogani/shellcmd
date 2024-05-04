@@ -2,7 +2,7 @@ import std/[os]
 import ./[common, distro, systemctl]
 
 
-proc install*(sh: ProcArgs, packages: varargs[string]) {.async.} =
+proc install*(sh: ProcArgs, packages: seq[string]) {.async.} =
     if packages.len() == 0: return
     await sh.runDiscard((case await sh.getDistroName():
         of Debian:
@@ -14,7 +14,10 @@ proc install*(sh: ProcArgs, packages: varargs[string]) {.async.} =
         ) & @packages
     )
 
-proc installWithoutEnabling*(sh: ProcArgs, packages: varargs[string]) {.async.} =
+proc install*(sh: ProcArgs, packages: varargs[string]): Future[void] =
+    sh.install(@packages)
+
+proc installWithoutEnabling*(sh: ProcArgs, packages: seq[string]) {.async.} =
     var servicesBefore = await systemctl.listRunningOrEnabled(sh)
     await sh.install(packages)
     sleep(2000)
@@ -26,8 +29,10 @@ proc installWithoutEnabling*(sh: ProcArgs, packages: varargs[string]) {.async.} 
                 service
     systemctl.stopAndDisable(sh, unwantedServices)
 
+proc installWithoutEnabling*(sh: ProcArgs, packages: varargs[string]): Future[void] =
+    sh.installWithoutEnabling(@packages)
 
-proc remove*(sh: ProcArgs, packages: varargs[string]) {.async.} =
+proc remove*(sh: ProcArgs, packages: seq[string]) {.async.} =
     if packages.len() == 0: return
     await sh.runDiscard((case await sh.getDistroName():
         of Debian:
@@ -39,7 +44,10 @@ proc remove*(sh: ProcArgs, packages: varargs[string]) {.async.} =
         ) & @packages
     )
 
-proc removeAndPurge*(sh: ProcArgs, packages: varargs[string]) {.async.} =
+proc remove*(sh: ProcArgs, packages: varargs[string]): Future[void] =
+    sh.remove(@packages)
+
+proc removeAndPurge*(sh: ProcArgs, packages: seq[string]) {.async.} =
     if packages.len() == 0: return
     await sh.runDiscard((case await sh.getDistroName():
         of Debian:
@@ -50,6 +58,9 @@ proc removeAndPurge*(sh: ProcArgs, packages: varargs[string]) {.async.} =
             @["pacman", "-Rns"]
         ) & @packages
     )
+
+proc removeAndPurge*(sh: ProcArgs, packages: varargs[string]): Future[void] =
+    sh.removeAndPurge(@packages)
 
 proc update*(sh: ProcArgs) {.async.} =
     await sh.runDiscard((case await sh.getDistroName():
@@ -74,6 +85,9 @@ proc clean*(sh: ProcArgs) {.async.} =
     )
 
 
-proc installPip*(sh: ProcArgs, packages: varargs[string]) {.async.} =
+proc installPip*(sh: ProcArgs, packages: seq[string]) {.async.} =
     if packages.len() == 0: return
     await sh.runDiscard(@["python3", "-m", "pip", "install"] & @packages)
+
+proc installPip*(sh: ProcArgs, packages: varargs[string]): Future[void] =
+    sh.installPip(@packages)

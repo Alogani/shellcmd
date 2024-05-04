@@ -23,7 +23,7 @@ proc resize*(sh: ProcArgs, img: Path, sign: ResizeSign, sizeDiff: StorageSize, f
 proc attachPartitionsToHost*(sh: ProcArgs, img: Path, format: ImageFormat): Future[seq[Path]] {.async.} =
     ## Can then be mount with mount
     if format == Raw:
-        return await sh.attachLoopDev(img)
+        return await sh.attachLoopDevWithPartitions(img)
     else:
         let freeSlot = block:
             var res: char

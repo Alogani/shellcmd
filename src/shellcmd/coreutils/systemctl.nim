@@ -22,7 +22,7 @@ proc listRunningOrEnabled*(sh: ProcArgs): Future[seq[string]] {.async.} =
             if "enabled" in serviceInfo or "running" in serviceInfo:
                 serviceInfo.strip(trailing = false).split(" ")[0]
 
-proc start(sh: ProcArgs, enable = false, services: varargs[string]) {.async.} =
+proc start(sh: ProcArgs, enable: bool, services: seq[string]) {.async.} =
     if services.len() == 0:
         return
     await sh.runDiscard(@["systemctl", "start"] & @services)
@@ -30,12 +30,12 @@ proc start(sh: ProcArgs, enable = false, services: varargs[string]) {.async.} =
         await sh.runDiscard(@["systemctl", "enable"] & @services)
 
 proc start*(sh: ProcArgs, services: varargs[string]): Future[void] =
-    sh.start(enable = false, services)
+    sh.start(enable = false, @services)
 
 proc startAndEnable*(sh: ProcArgs, services: varargs[string]): Future[void] =
-    sh.start(enable = true, services)
+    sh.start(enable = true, @services)
 
-proc stop(sh: ProcArgs, disable = false, services: varargs[string]) {.async.} =
+proc stop(sh: ProcArgs, disable: bool, services: seq[string]) {.async.} =
     if services.len() == 0:
         return
     await sh.runDiscard(@["systemctl", "stop"] & @services)
@@ -43,10 +43,10 @@ proc stop(sh: ProcArgs, disable = false, services: varargs[string]) {.async.} =
         await sh.runDiscard(@["systemctl", "disable"] & @services)
 
 proc stop*(sh: ProcArgs, services: varargs[string]): Future[void] =
-    sh.stop(disable = false, services)
+    sh.stop(disable = false, @services)
 
 proc stopAndDisable*(sh: ProcArgs, services: varargs[string]): Future[void] =
-    sh.stop(disable = true, services)
+    sh.stop(disable = true, @services)
 
 proc restart*(sh: ProcArgs, services: varargs[string]): Future[void] =
     if services.len() == 0: return

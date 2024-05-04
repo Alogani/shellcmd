@@ -10,4 +10,5 @@ proc rsync*(sh: ProcArgs, src, dest: Path, options: set[RsyncOptions] = {}, band
         (if Compress in options: @["--compress"] else: @[]) &
         (if SyncDeletion in options: @["--delete"] else: @[]) &
         (if bandWith != -1: @["--bwlimit=" & $bandWith] else: @[]) &
-        @[src & "/", dest & "/"])
+        @[if src[^1] == '/': src else: src & "/",
+            if dest[^1] == '/': dest else: dest & "/"])

@@ -12,6 +12,8 @@ import ./coreutils/configfile/backupfile
 export backupfile
 import ./coreutils/configfile/fstab
 export fstab
+import ./coreutils/dependencyhandler
+export dependencyhandler
 import ./coreutils/distro
 export distro
 import ./coreutils/file/filecontent

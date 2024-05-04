@@ -1,6 +1,8 @@
 # ShellCmd
 Collection of asynchronous Terminal commands to be used inside nim.
 
+This is not a DSL, neither a new shell language, but a wrapper around all binaries the shell can access. So it permits to leverage all your existing knowledge of shell commands in a modern and powerful existing language (nim) to write expressive, powerful, extensive and reliable scripts.
+
 ## Features
 
 - Developped with interactivness in mind (you can develop both semi-automated script, as well as fully automated one)
@@ -9,8 +11,8 @@ Collection of asynchronous Terminal commands to be used inside nim.
 - As concise as a shell: Focused to be as one liner as possible even for complex commands and to avoid repetition
 - Focused to return as much as possible high level objects instead of raw data (eg : sh.ls(path) -> seq[Path])
 - Self documenting: Goal is to make you know how to use any command only by looking at its definition. But a basic knowledge of the commands and especially their names is required (eg: ls, cat, etc.)
-- Generalist: Goal is to cover as many terminal tools as possible (As a default export if their are shipped very common, or needing an import if their need to be installed or are less common), and to cover 90% of uses cases of those tools (all uses cases coverage is not possible nor wanted, if your case is too specific, use [asyncproc](https://github.com/Alogani/asyncproc))
-- Easy to extend: thanks to the use of the powerful library [asyncproc](https://github.com/Alogani/asyncproc) and its flexible streams manipulation [asyncio](https://github.com/Alogani/asyncio)
+- Generalist: Goal is to cover as many terminal tools as possible (As a default export if their are shipped very common, or needing an import if their need to be installed or are less common), and to cover 90% of uses cases of those tools (all uses cases coverage is not possible nor wanted)
+- Easy to extend: thanks to the use of the powerful library [asyncproc](https://github.com/Alogani/asyncproc) and its flexible streams manipulation [asyncio](https://github.com/Alogani/asyncio) to respond to specific use cases
 
 ## Getting started
 

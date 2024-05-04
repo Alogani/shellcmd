@@ -4,8 +4,8 @@ export sequtils, strutils, sugar
 import asyncproc
 export asyncproc
 
-import asyncio, asyncio/[asyncstream, asyncstring]
-export asyncio, asyncstream, asyncstring
+import asyncio
+export asyncio
 
 import aloganimisc/units/storage
 export storage
