@@ -1,6 +1,8 @@
 # ShellCmd
 Collection of asynchronous Terminal commands to be used inside nim.
 
+**Important note: A major refactor is upcomming to get rid of async/await syntax by changing the underlying IO library**
+
 ## Features
 
 - Developped with interactivness in mind (you can develop both semi-automated script, as well as fully automated one)
